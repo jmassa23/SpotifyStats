@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from collections import defaultdict
 
 class SongPlay:
     def __init__(self, artist, song_name, album, play_time):
@@ -22,7 +23,8 @@ class SongPlay:
         self.count += 1
 
 def read_json_files(directory):
-    song_set = set()  # Set to store SongPlay objects
+    songs_dict = {}  # Key: song_name, artist, album | Value: SongPlay object
+    artists_dict = defaultdict(int)  # Key: artist | Value: total listen count
 
     # Get all the JSON files in the current directory
     json_files = Path(directory).glob("*.json")
@@ -39,36 +41,43 @@ def read_json_files(directory):
                 album = entry.get("master_metadata_album_album_name")
                 play_time = entry.get("ms_played", 0)  # Default to 0 if no play_time provided
                 
-                # Check if we already have the song in the set
-                existing_song = next((song for song in song_set if song.song_name == song_name and song.artist == artist and song.album == album), None)
-                
-                if existing_song:
-                    # If song already exists, increment its count
-                    existing_song.increment_count()
+                # Update song dictionary with SongPlay object
+                song_key = (song_name, artist, album)
+                if song_key in songs_dict:
+                    songs_dict[song_key].increment_count()
                 else:
-                    # If song doesn't exist, create a new SongPlay and add to set
-                    new_song = SongPlay(artist, song_name, album, play_time)
-                    song_set.add(new_song)
+                    songs_dict[song_key] = SongPlay(artist, song_name, album, play_time)
                 
+                # Update artist listen count
+                artists_dict[artist] += 1
+
         except json.JSONDecodeError as e:
             print(f"Error reading {json_file}: {e}")
         except Exception as e:
             print(f"Error processing {json_file}: {e}")
     
-    return song_set
+    return songs_dict, artists_dict
 
 def main():
     directory = "."  # Current directory where the script is located
     
-    song_set = read_json_files(directory)
+    songs_dict, artists_dict = read_json_files(directory)
     
-    # Sort the songs by the number of listens in descending order
-    sorted_songs = sorted(song_set, key=lambda song: song.count, reverse=True)
+    # Sort the songs by the number of listens in descending order for output
+    sorted_songs = sorted(songs_dict.values(), key=lambda song: song.count, reverse=True)
+    
+    # Sort the artists by the number of listens in descending order for output
+    sorted_artists = sorted(artists_dict.items(), key=lambda x: x[1], reverse=True)
     
     # Print the top 50 most listened songs
     print("Top 50 most listened songs:")
     for i, song in enumerate(sorted_songs[:50]):
         print(f"{i + 1}. {song.song_name} by {song.artist} - {song.count} listens")
+
+    # Print the top 50 most listened artists
+    print("\nTop 50 most listened artists:")
+    for i, (artist, count) in enumerate(sorted_artists[:50]):
+        print(f"{i + 1}. {artist} - {count} listens")
 
 if __name__ == "__main__":
     main()
