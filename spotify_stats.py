@@ -103,17 +103,17 @@ def main():
     # Print the top 50 most listened songs
     print("Top 50 most listened songs:")
     for i, song in enumerate(sorted_songs[:50]):
-        print(f"{i + 1}. {song.song_name} by {song.artist} - {song.count} listens, {round(song.total_play_time / 60000)} minutes")
+        print(f"{i + 1}. {song.song_name} by {song.artist} -- {song.count} listens -- {round(song.total_play_time / 60000)} minutes")
 
     # Print the top 50 most listened artists
     print("\nTop 50 most listened artists:")
     for i, (artist, data) in enumerate(sorted_artists[:50]):
-        print(f"{i + 1}. {artist} - {data['count']} listens, {round(data['total_play_time'] / 60000)} minutes")
+        print(f"{i + 1}. {artist} -- {data['count']} listens -- {round(data['total_play_time'] / 60000)} minutes")
 
     # Print the top 50 most listened albums
     print("\nTop 50 most listened albums:")
     for i, (album, data) in enumerate(sorted_albums[:50]):
-        print(f"{i + 1}. {album} by {data['artist']} - {data['count']} listens, {round(data['total_play_time'] / 60000)} minutes")
+        print(f"{i + 1}. {album} by {data['artist']} -- {data['count']} listens -- {round(data['total_play_time'] / 60000)} minutes")
 
     # Print total listening statistics
     print("\nTotal number of minutes listened: ", total_milliseconds_of_music / 60000)
