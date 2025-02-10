@@ -25,7 +25,7 @@ class SongPlay:
 def read_json_files(directory):
     songs_dict = {}  # Key: song_name, artist, album | Value: SongPlay object
     artists_dict = defaultdict(int)  # Key: artist | Value: total listen count
-
+    total_milliseconds_of_music = 0
     # Get all the JSON files in the current directory
     json_files = Path(directory).glob("*.json")
     
@@ -36,10 +36,21 @@ def read_json_files(directory):
 
             # For each song entry in the JSON file, add or update SongPlay object
             for entry in data:
+                play_time = entry.get("ms_played", 0)  # Default to 0 if no play_time provided
+                reason_end = entry.get("reason_end")
+
+                total_milliseconds_of_music += play_time
+
+                # if a song was played for less than 30 seconds, don't count it as a listen
+                if(play_time < 30000 and reason_end!="endplay"):
+                    continue
+                
                 artist = entry.get("master_metadata_album_artist_name")
                 song_name = entry.get("master_metadata_track_name")
                 album = entry.get("master_metadata_album_album_name")
-                play_time = entry.get("ms_played", 0)  # Default to 0 if no play_time provided
+
+                if not artist or not song_name or not album:
+                    continue
                 
                 # Update song dictionary with SongPlay object
                 song_key = (song_name, artist, album)
@@ -56,12 +67,12 @@ def read_json_files(directory):
         except Exception as e:
             print(f"Error processing {json_file}: {e}")
     
-    return songs_dict, artists_dict
+    return songs_dict, artists_dict, total_milliseconds_of_music
 
 def main():
     directory = "."  # Current directory where the script is located
     
-    songs_dict, artists_dict = read_json_files(directory)
+    songs_dict, artists_dict, total_milliseconds_of_music = read_json_files(directory)
     
     # Sort the songs by the number of listens in descending order for output
     sorted_songs = sorted(songs_dict.values(), key=lambda song: song.count, reverse=True)
@@ -78,6 +89,10 @@ def main():
     print("\nTop 50 most listened artists:")
     for i, (artist, count) in enumerate(sorted_artists[:50]):
         print(f"{i + 1}. {artist} - {count} listens")
+
+    print("\nTotal number of seconds listened: ", total_milliseconds_of_music / 1000)
+    print("\nTotal number of minutes listened: ", total_milliseconds_of_music / 60000)
+
 
 if __name__ == "__main__":
     main()
