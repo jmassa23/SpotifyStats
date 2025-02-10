@@ -26,6 +26,7 @@ def read_json_files(directory):
     songs_dict = {}  # Key: song_name, artist, album | Value: SongPlay object
     artists_dict = defaultdict(int)  # Key: artist | Value: total listen count
     total_milliseconds_of_music = 0
+    total_song_plays = 0
     # Get all the JSON files in the current directory
     json_files = Path(directory).glob("*.json")
     
@@ -39,8 +40,6 @@ def read_json_files(directory):
                 play_time = entry.get("ms_played", 0)  # Default to 0 if no play_time provided
                 reason_end = entry.get("reason_end")
 
-                total_milliseconds_of_music += play_time
-
                 # if a song was played for less than 30 seconds, don't count it as a listen
                 if(play_time < 30000 and reason_end!="endplay"):
                     continue
@@ -51,6 +50,9 @@ def read_json_files(directory):
 
                 if not artist or not song_name or not album:
                     continue
+
+                total_milliseconds_of_music += play_time
+                total_song_plays += 1
                 
                 # Update song dictionary with SongPlay object
                 song_key = (song_name, artist, album)
@@ -67,12 +69,12 @@ def read_json_files(directory):
         except Exception as e:
             print(f"Error processing {json_file}: {e}")
     
-    return songs_dict, artists_dict, total_milliseconds_of_music
+    return songs_dict, artists_dict, total_milliseconds_of_music, total_song_plays
 
 def main():
     directory = "."  # Current directory where the script is located
     
-    songs_dict, artists_dict, total_milliseconds_of_music = read_json_files(directory)
+    songs_dict, artists_dict, total_milliseconds_of_music, total_song_plays = read_json_files(directory)
     
     # Sort the songs by the number of listens in descending order for output
     sorted_songs = sorted(songs_dict.values(), key=lambda song: song.count, reverse=True)
@@ -90,8 +92,8 @@ def main():
     for i, (artist, count) in enumerate(sorted_artists[:50]):
         print(f"{i + 1}. {artist} - {count} listens")
 
-    print("\nTotal number of seconds listened: ", total_milliseconds_of_music / 1000)
     print("\nTotal number of minutes listened: ", total_milliseconds_of_music / 60000)
+    print("\nTotal number of song plays: ", total_song_plays)
 
 
 if __name__ == "__main__":
