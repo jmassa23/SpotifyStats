@@ -116,9 +116,9 @@ def main():
         print(f"{i + 1}. {album} by {data['artist']} -- {data['count']} listens -- {round(data['total_play_time'] / 60000)} minutes")
 
     # Print number of unique songs, artists, albums
-    print(f"\nYou Listened to {len(sorted_songs)} unique songs.")
-    print(f"You Listened to {len(sorted_artists)} unique artists.")
-    print(f"You Listened to {len(sorted_albums)} unique albums.")
+    print(f"\nYou listened to {len(sorted_songs)} unique songs.")
+    print(f"You listened to {len(sorted_artists)} unique artists.")
+    print(f"You listened to {len(sorted_albums)} unique albums.")
 
     # Print total listening statistics
     print("\nTotal number of minutes listened: ", total_milliseconds_of_music / 60000)
